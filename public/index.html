@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fractal Viewer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <h1>Visualizador Interactivo de Fractales</h1>
+
+  <div id="controls">
+    <label for="fractalType">Fractal:</label>
+    <select id="fractalType">
+      <option value="koch">Curva de Koch</option>
+      <option value="sierpinski">Triángulo de Sierpinski</option>
+      <option value="mandelbrot">Conjunto de Mandelbrot</option>
+      <option value="julia">Conjunto de Julia</option>
+      <option value="tree">Árbol Fractal</option>
+    </select>
+
+    <label for="depthSlider">Nivel:</label>
+    <input type="range" id="depthSlider" min="0" max="6" value="0" />
+    <span id="depthValue">0</span>
+
+    <button id="saveBtn">Guardar Imagen</button>
+  </div>
+
+  <canvas id="fractalCanvas" width="800" height="600"></canvas>
+
+  <!-- Módulo principal del proyecto -->
+  <script type="module" src="../main.js"></script>
+</body>
+</html>

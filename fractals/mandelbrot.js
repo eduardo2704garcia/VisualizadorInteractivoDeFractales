@@ -1,35 +1,68 @@
-export function drawMandelbrot(ctx) {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
+import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 
-  const imageData = ctx.createImageData(width, height);
-  const maxIter = 100;
+export class MandelbrotExplorer {
+  constructor(container, app, maxIterations = 100) {
+    this.container = container;
+    this.app = app;
+    this.width = app.screen.width;
+    this.height = app.screen.height;
+    this.maxIterations = maxIterations;
+    this.zoom = 250;
+    this.offsetX = this.width / 2;
+    this.offsetY = this.height / 2;
 
-  // Coordenadas en el plano complejo
-  const xmin = -2.5, xmax = 1;
-  const ymin = -1, ymax = 1;
+    this.canvas = document.createElement('canvas');
+    this.canvas.width = this.width;
+    this.canvas.height = this.height;
+    this.ctx = this.canvas.getContext('2d');
 
-  for (let px = 0; px < width; px++) {
-    for (let py = 0; py < height; py++) {
-      const x0 = xmin + (px / width) * (xmax - xmin);
-      const y0 = ymin + (py / height) * (ymax - ymin);
+    this.sprite = PIXI.Sprite.from(this.canvas);
+    this.sprite.x = -this.width / 2 + this.offsetX;
+    this.sprite.y = -this.height / 2 + this.offsetY;
+    this.container.addChild(this.sprite);
 
-      let x = 0, y = 0, iteration = 0;
-      while (x * x + y * y <= 4 && iteration < maxIter) {
-        const xtemp = x * x - y * y + x0;
-        y = 2 * x * y + y0;
-        x = xtemp;
-        iteration++;
-      }
-
-      const color = iteration === maxIter ? 0 : (iteration * 255) / maxIter;
-      const index = (py * width + px) * 4;
-      imageData.data[index] = color;       // R
-      imageData.data[index + 1] = 0;       // G
-      imageData.data[index + 2] = color;   // B
-      imageData.data[index + 3] = 255;     // A
-    }
+    this.render();
   }
 
-  ctx.putImageData(imageData, 0, 0);
+  render(newMaxIterations) {
+    if (newMaxIterations) this.maxIterations = newMaxIterations;
+
+    const imageData = this.ctx.createImageData(this.width, this.height);
+    const data = imageData.data;
+
+    for (let x = 0; x < this.width; x++) {
+      for (let y = 0; y < this.height; y++) {
+        let zx = 0, zy = 0;
+        const cx = (x - this.offsetX) / this.zoom;
+        const cy = (y - this.offsetY) / this.zoom;
+        let i = 0;
+
+        while (zx * zx + zy * zy < 4 && i < this.maxIterations) {
+          const temp = zx * zx - zy * zy + cx;
+          zy = 2 * zx * zy + cy;
+          zx = temp;
+          i++;
+        }
+
+        const idx = (y * this.width + x) * 4;
+
+        const r = i === this.maxIterations ? 11 : (138 * i / this.maxIterations);
+        const g = i === this.maxIterations ? 0 : (43 * i / this.maxIterations);
+        const b = i === this.maxIterations ? 26 : (130 * i / this.maxIterations);
+
+        data[idx] = r;
+        data[idx + 1] = g;
+        data[idx + 2] = b;
+        data[idx + 3] = 255;
+      }
+    }
+
+    this.ctx.putImageData(imageData, 0, 0);
+    this.sprite.texture.update();
+  }
+
+  destroy() {
+    this.container.removeChild(this.sprite);
+    this.sprite.destroy();
+  }
 }

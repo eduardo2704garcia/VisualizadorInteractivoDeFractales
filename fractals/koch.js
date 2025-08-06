@@ -1,39 +1,40 @@
-export function drawKoch(ctx, depth) {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
+import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 
-  const start = { x: 50, y: height / 2 };
-  const end = { x: width - 50, y: height / 2 };
+export function drawKoch(container, x, y, size, depth) {
+  const graphics = new PIXI.Graphics();
+  graphics.lineStyle(1.5, 0x87ceeb); // azul cielo
 
-  drawSegment(ctx, start, end, depth);
-}
+  const h = Math.sqrt(3) / 2 * size;
+  const p1 = { x: x, y: y };
+  const p2 = { x: x + size, y: y };
+  const p3 = { x: x + size / 2, y: y - h };
 
-function drawSegment(ctx, p1, p2, depth) {
-  if (depth === 0) {
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = "white";
-    ctx.stroke();
-    return;
+  drawKochSide(p1, p2, depth);
+  drawKochSide(p2, p3, depth);
+  drawKochSide(p3, p1, depth);
+
+  container.addChild(graphics);
+
+  function drawKochSide(a, b, depth) {
+    if (depth === 0) {
+      graphics.moveTo(a.x, a.y);
+      graphics.lineTo(b.x, b.y);
+      return;
+    }
+
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const p1 = { x: a.x + dx / 3, y: a.y + dy / 3 };
+    const p2 = { x: a.x + 2 * dx / 3, y: a.y + 2 * dy / 3 };
+
+    const angle = Math.PI / 3;
+    const px = p1.x + Math.cos(angle) * (p2.x - p1.x) - Math.sin(angle) * (p2.y - p1.y);
+    const py = p1.y + Math.sin(angle) * (p2.x - p1.x) + Math.cos(angle) * (p2.y - p1.y);
+    const peak = { x: px, y: py };
+
+    drawKochSide(a, p1, depth - 1);
+    drawKochSide(p1, peak, depth - 1);
+    drawKochSide(peak, p2, depth - 1);
+    drawKochSide(p2, b, depth - 1);
   }
-
-  const dx = (p2.x - p1.x) / 3;
-  const dy = (p2.y - p1.y) / 3;
-
-  const a = p1;
-  const b = { x: p1.x + dx, y: p1.y + dy };
-  const d = { x: p1.x + 2 * dx, y: p1.y + 2 * dy };
-  const e = p2;
-
-  const angle = Math.PI / 3;
-  const c = {
-    x: b.x + Math.cos(angle) * (dx) - Math.sin(angle) * (dy),
-    y: b.y + Math.sin(angle) * (dx) + Math.cos(angle) * (dy)
-  };
-
-  drawSegment(ctx, a, b, depth - 1);
-  drawSegment(ctx, b, c, depth - 1);
-  drawSegment(ctx, c, d, depth - 1);
-  drawSegment(ctx, d, e, depth - 1);
 }

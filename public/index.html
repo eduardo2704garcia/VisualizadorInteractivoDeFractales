@@ -1,35 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fractal Viewer</title>
+  <title>Visualizador de Fractales</title>
   <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body>
 
-  <h1>Visualizador Interactivo de Fractales</h1>
+<body>
+  <header>
+    <h1>Explorador de Fractales Interactivo</h1>
+  </header>
+
+  <div id="fractalButtons">
+    <button data-fractal="sierpinski">Triángulo de Sierpinski</button>
+    <button data-fractal="koch">Curva de Koch</button>
+    <button data-fractal="fractalTree">Árbol Fractal</button>
+    <button data-fractal="mandelbrot">Conjunto de Mandelbrot</button>
+    <button data-fractal="julia">Conjunto de Julia</button>
+  </div>
 
   <div id="controls">
-    <label for="fractalType">Fractal:</label>
-    <select id="fractalType">
-      <option value="koch">Curva de Koch</option>
-      <option value="sierpinski">Triángulo de Sierpinski</option>
-      <option value="mandelbrot">Conjunto de Mandelbrot</option>
-      <option value="julia">Conjunto de Julia</option>
-      <option value="tree">Árbol Fractal</option>
-    </select>
+    <label>
+      Profundidad: <span id="depthValue">4</span>
+      <input type="range" id="depthSlider" min="1" max="8" value="4" />
+    </label>
 
-    <label for="depthSlider">Nivel:</label>
-    <input type="range" id="depthSlider" min="0" max="6" value="0" />
-    <span id="depthValue">0</span>
+    <label>
+      Rotación: <span id="rotationValue">0</span>
+      <input type="range" id="rotationSlider" min="0" max="360" value="0" />
+    </label>
 
     <button id="saveBtn">Guardar Imagen</button>
   </div>
 
-  <canvas id="fractalCanvas" width="800" height="600"></canvas>
-
-  <!-- Módulo principal del proyecto -->
   <script type="module" src="../main.js"></script>
 </body>
+
 </html>

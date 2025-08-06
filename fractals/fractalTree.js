@@ -1,28 +1,29 @@
-export function drawTree(ctx, depth) {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
+import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 
-  const startX = width / 2;
-  const startY = height - 50;
+export function drawTree(container, x, y, length, angle, depth) {
+    const graphics = new PIXI.Graphics();
+    graphics.lineStyle(1.5, 0x556b2f); // verde oliva
 
-  ctx.strokeStyle = "white";
-  ctx.lineWidth = 1;
+    function recursiveDraw(x, y, length, angle, depth) {
+        if (depth === 0) return;
 
-  drawBranch(ctx, startX, startY, -90, depth, 100);
-}
+        const x2 = x + Math.cos(angle) * length;
+        const y2 = y - Math.sin(angle) * length;
 
-function drawBranch(ctx, x, y, angle, depth, length) {
-  if (depth === 0) return;
+        graphics.moveTo(x, y);
+        graphics.lineTo(x2, y2);
 
-  const rad = angle * (Math.PI / 180);
-  const x2 = x + Math.cos(rad) * length;
-  const y2 = y + Math.sin(rad) * length;
+        const newLength = length * 0.7;
+        const spread = Math.PI / 2;
+        const startAngle = angle - spread / 2;
+        const branches = 5;
 
-  ctx.beginPath();
-  ctx.moveTo(x, y);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
+        for (let i = 0; i < branches; i++) {
+            const branchAngle = startAngle + (i / (branches - 1)) * spread;
+            recursiveDraw(x2, y2, newLength, branchAngle, depth - 1);
+        }
+    }
 
-  drawBranch(ctx, x2, y2, angle - 25, depth - 1, length * 0.7);
-  drawBranch(ctx, x2, y2, angle + 25, depth - 1, length * 0.7);
+    recursiveDraw(x, y, length, angle, depth);
+    container.addChild(graphics);
 }

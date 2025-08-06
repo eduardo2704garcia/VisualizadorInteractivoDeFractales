@@ -1,38 +1,35 @@
-export function drawSierpinski(ctx, depth) {
-  const width = ctx.canvas.width;
-  const height = ctx.canvas.height;
+import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 
-  const p1 = { x: width / 2, y: 50 };
-  const p2 = { x: 50, y: height - 50 };
-  const p3 = { x: width - 50, y: height - 50 };
+export function drawSierpinski(container, x, y, size, depth) {
+  const height = (Math.sqrt(3) / 2) * size;
 
-  ctx.fillStyle = "white";
-  drawTriangle(ctx, p1, p2, p3, depth);
-}
+  function drawFilledTriangle(g, x, y, size, depth) {
+    const h = (Math.sqrt(3) / 2) * size;
+    const greenValue = Math.max(0, 255 - depth * 30);
+    const color = (0x00 << 16) | (greenValue << 8) | 0x00;
 
-function drawTriangle(ctx, p1, p2, p3, depth) {
-  if (depth === 0) {
-    ctx.beginPath();
-    ctx.moveTo(p1.x, p1.y);
-    ctx.lineTo(p2.x, p2.y);
-    ctx.lineTo(p3.x, p3.y);
-    ctx.closePath();
-    ctx.fill();
-    return;
+    g.beginFill(color);
+    g.moveTo(x, y);
+    g.lineTo(x + size / 2, y + h);
+    g.lineTo(x - size / 2, y + h);
+    g.lineTo(x, y);
+    g.endFill();
   }
 
-  const mid12 = midpoint(p1, p2);
-  const mid23 = midpoint(p2, p3);
-  const mid31 = midpoint(p3, p1);
+  function recursiveDraw(x, y, size, depth) {
+    if (depth === 0) {
+      const graphics = new PIXI.Graphics();
+      drawFilledTriangle(graphics, x, y, size, depth);
+      container.addChild(graphics);
+    } else {
+      const newSize = size / 2;
+      const h = (Math.sqrt(3) / 2) * newSize;
 
-  drawTriangle(ctx, p1, mid12, mid31, depth - 1);
-  drawTriangle(ctx, mid12, p2, mid23, depth - 1);
-  drawTriangle(ctx, mid31, mid23, p3, depth - 1);
-}
+      recursiveDraw(x, y, newSize, depth - 1);
+      recursiveDraw(x - newSize / 2, y + h, newSize, depth - 1);
+      recursiveDraw(x + newSize / 2, y + h, newSize, depth - 1);
+    }
+  }
 
-function midpoint(p1, p2) {
-  return {
-    x: (p1.x + p2.x) / 2,
-    y: (p1.y + p2.y) / 2
-  };
+  recursiveDraw(x, y, size, depth);
 }

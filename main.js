@@ -1,87 +1,146 @@
-import { drawKoch } from './Fractals/koch.js';
+import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 import { drawSierpinski } from './Fractals/sierpinski.js';
-import { drawMandelbrot } from './Fractals/mandelbrot.js';
-import { drawJulia } from './Fractals/julia.js';
-import { drawTree } from './Fractals/fractalTree.js';
+import { drawKoch } from './fractals/koch.js';
+import { drawTree } from './fractals/fractalTree.js';
+import { MandelbrotExplorer } from './fractals/mandelbrot.js';
+import { JuliaExplorer } from './fractals/julia.js';
+import { enableKeyboardControls } from './interactions/controls.js';
 
-import { movePan, getPan, resetPan } from './interactions/pan.js';
-import { zoomIn, zoomOut, rotateLeft, rotateRight, getZoomAndRotation, resetZoomAndRotation } from './interactions/zoom.js';
+let mandelbrotExplorer = null;
+let juliaExplorer = null;
+let currentFractal = 'sierpinski';
 
-const canvas = document.getElementById("fractalCanvas");
-const ctx = canvas.getContext("2d");
+const app = new PIXI.Application({
+  resizeTo: window,
+  backgroundColor: 0x000000
+});
+document.body.appendChild(app.view);
 
-const fractalType = document.getElementById("fractalType");
-const depthSlider = document.getElementById("depthSlider");
-const depthValue = document.getElementById("depthValue");
+const fractalContainer = new PIXI.Container();
+app.stage.addChild(fractalContainer);
 
-const offscreenCanvas = document.createElement("canvas");
-offscreenCanvas.width = canvas.width;
-offscreenCanvas.height = canvas.height;
-const offCtx = offscreenCanvas.getContext("2d");
+// UI Elements
+const depthSlider = document.getElementById('depthSlider');
+const depthValue = document.getElementById('depthValue');
+const rotationSlider = document.getElementById('rotationSlider');
+const rotationValue = document.getElementById('rotationValue');
+const saveBtn = document.getElementById('saveBtn');
 
-function drawToOffscreen() {
-  offCtx.clearRect(0, 0, canvas.width, canvas.height);
-  const type = fractalType.value;
-  const depth = parseInt(depthSlider.value);
+// Update depth and re-render
+depthSlider.addEventListener('input', () => {
+  depthValue.textContent = depthSlider.value;
+  renderFractal();
+});
 
-  switch (type) {
-    case 'koch': drawKoch(offCtx, depth); break;
-    case 'sierpinski': drawSierpinski(offCtx, depth); break;
-    case 'mandelbrot': drawMandelbrot(offCtx); break;
-    case 'julia': drawJulia(offCtx); break;
-    case 'tree': drawTree(offCtx, depth); break;
+// Update rotation
+rotationSlider.addEventListener('input', () => {
+  rotationValue.textContent = rotationSlider.value;
+  fractalContainer.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
+});
+
+// Set rotation from keyboard
+window.addEventListener('keydown', (e) => {
+  let angle = parseFloat(rotationSlider.value);
+  if (e.key === 'ArrowRight') {
+    angle = (angle + 5) % 360;
+  } else if (e.key === 'ArrowLeft') {
+    angle = (angle - 5 + 360) % 360;
+  } else {
+    return;
+  }
+  rotationSlider.value = angle;
+  rotationValue.textContent = angle;
+  fractalContainer.rotation = angle * (Math.PI / 180);
+});
+
+// Zoom/Pan activation
+function toggleZoomPan(enable) {
+  if (enable) {
+    enableKeyboardControls(app, fractalContainer);
+  } else {
+    fractalContainer.eventMode = 'none';
+    fractalContainer.removeAllListeners();
+    fractalContainer.scale.set(1);
+    fractalContainer.position.set(app.screen.width / 2, app.screen.height / 2);
   }
 }
 
-function applyTransformations() {
-  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+// Render fractal
+function renderFractal() {
+  if (mandelbrotExplorer) {
+    mandelbrotExplorer.destroy();
+    mandelbrotExplorer = null;
+  }
+  if (juliaExplorer) {
+    juliaExplorer.destroy();
+    juliaExplorer = null;
+  }
 
-  const { offsetX, offsetY } = getPan();
-  const { scale, rotation } = getZoomAndRotation();
+  fractalContainer.removeChildren();
+  fractalContainer.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
+  fractalContainer.scale.set(1);
+  fractalContainer.pivot.set(0); // No centrado
+  fractalContainer.position.set(app.screen.width / 2, app.screen.height / 2);
 
-  ctx.translate(canvas.width / 2 + offsetX, canvas.height / 2 + offsetY);
-  ctx.scale(scale, scale);
-  ctx.rotate(rotation);
-  ctx.translate(-canvas.width / 2, -canvas.height / 2);
+  const depth = parseInt(depthSlider.value);
+  const mandelbrotIterations = depth * 50;
+  const juliaIterations = depth * 50;
 
-  ctx.drawImage(offscreenCanvas, 0, 0);
-}
+  switch (currentFractal) {
+    case 'sierpinski':
+      toggleZoomPan(true);
+      drawSierpinski(fractalContainer, app.screen.width / 2, 200, 400, depth);
+      break;
 
-function drawFractal() {
-  drawToOffscreen();
-  applyTransformations();
-}
+    case 'koch':
+      toggleZoomPan(true);
+      const size = Math.min(app.screen.width, app.screen.height) * 0.6;
+      const centerX = app.screen.width / 2;
+      const centerY = app.screen.height / 2 + size * Math.sqrt(3) / 6;
+      drawKoch(fractalContainer, centerX - size / 2, centerY, size, depth);
+      break;
 
-function handleKey(event) {
-  switch (event.key) {
-    case 'ArrowUp': movePan('up'); break;
-    case 'ArrowDown': movePan('down'); break;
-    case 'ArrowLeft': movePan('left'); break;
-    case 'ArrowRight': movePan('right'); break;
-    case 'w': case 'W': zoomIn(); break;
-    case 's': case 'S': zoomOut(); break;
-    case 'a': case 'A': rotateLeft(); break;
-    case 'd': case 'D': rotateRight(); break;
-    case 'r': case 'R':
-      resetPan();
-      resetZoomAndRotation();
+    case 'fractalTree':
+      toggleZoomPan(true);
+      const trunkLength = app.screen.height / 4;
+      const startX = app.screen.width / 2;
+      const startY = app.screen.height - 20;
+      drawTree(fractalContainer, startX, startY, trunkLength, Math.PI / 2, depth);
+      break;
+
+    case 'mandelbrot':
+      toggleZoomPan(false);
+      mandelbrotExplorer = new MandelbrotExplorer(fractalContainer, app, mandelbrotIterations);
+      break;
+
+    case 'julia':
+      toggleZoomPan(false);
+      juliaExplorer = new JuliaExplorer(fractalContainer, app, {
+        cRe: -0.70176,
+        cIm: -0.3842
+      }, juliaIterations);
       break;
   }
-  applyTransformations();
+
+  document.body.style.backgroundColor = (currentFractal === 'julia') ? '#000' : '#000';
 }
 
-fractalType.addEventListener("change", drawFractal);
-depthSlider.addEventListener("input", () => {
-  depthValue.textContent = depthSlider.value;
-  drawFractal();
+// Handle fractal button clicks
+document.querySelectorAll('#fractalButtons button').forEach(button => {
+  button.addEventListener('click', () => {
+    currentFractal = button.getAttribute('data-fractal');
+    renderFractal();
+  });
 });
-document.getElementById("saveBtn").addEventListener("click", () => {
+
+// Save image
+saveBtn.addEventListener('click', () => {
+  const extractedCanvas = app.renderer.extract.canvas(app.stage);
   const link = document.createElement('a');
   link.download = 'fractal.png';
-  link.href = canvas.toDataURL();
+  link.href = extractedCanvas.toDataURL('image/png');
   link.click();
 });
 
-window.addEventListener("keydown", handleKey);
-window.onload = drawFractal;
+// Initial render
+renderFractal();

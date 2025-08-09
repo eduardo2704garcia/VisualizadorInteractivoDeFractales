@@ -16,10 +16,11 @@ export class MandelbrotExplorer {
     this.canvas.height = this.height;
     this.ctx = this.canvas.getContext('2d');
 
-    this.sprite = PIXI.Sprite.from(this.canvas);
-    this.sprite.x = -this.width / 2 + this.offsetX;
-    this.sprite.y = -this.height / 2 + this.offsetY;
-    this.container.addChild(this.sprite);
+this.sprite = PIXI.Sprite.from(this.canvas);
+this.sprite.anchor.set(0.5);
+this.sprite.position.set(0, 0);
+this.container.addChild(this.sprite);
+
 
     this.render();
   }

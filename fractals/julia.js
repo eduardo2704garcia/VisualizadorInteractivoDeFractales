@@ -62,14 +62,12 @@ export class JuliaExplorer {
     }
 
     updateTexture() {
-        if (this.sprite) this.container.removeChild(this.sprite);
+if (this.sprite) this.container.removeChild(this.sprite);
+this.sprite = PIXI.Sprite.from(this.canvas);
+this.sprite.anchor.set(0.5);
+this.sprite.position.set(0, 0);
+this.container.addChild(this.sprite);
 
-        this.sprite = PIXI.Sprite.from(this.canvas);
-        this.sprite.x = -this.width / 2 + this.container.x;
-        this.sprite.y = -this.height / 2 + this.container.y;
-        this.sprite.width = this.width;
-        this.sprite.height = this.height;
-        this.container.addChild(this.sprite);
     }
 
     attachControls() {

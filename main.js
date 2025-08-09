@@ -4,7 +4,7 @@ import { drawKoch } from './fractals/koch.js';
 import { drawTree } from './fractals/fractalTree.js';
 import { MandelbrotExplorer } from './fractals/mandelbrot.js';
 import { JuliaExplorer } from './fractals/julia.js';
-import { enableKeyboardControls } from './interactions/controls.js';
+import { enableKeyboardControls, setKeyboardActive } from './interactions/controls.js';
 
 let mandelbrotExplorer = null;
 let juliaExplorer = null;
@@ -38,9 +38,11 @@ depthSlider.addEventListener('input', () => {
 
 // Update rotation
 rotationSlider.addEventListener('input', () => {
+  if (rotationSlider.disabled) return; // no hacer nada si está off
   rotationValue.textContent = rotationSlider.value;
   content.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
 });
+
 
 window.addEventListener('keydown', (e) => {
   let angle = parseFloat(rotationSlider.value);
@@ -48,10 +50,14 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowLeft') angle = (angle - 5 + 360) % 360;
   else return;
 
+  // Ignora en fractales de píxeles
+  if (currentFractal === 'julia' || currentFractal === 'mandelbrot') return;
+
   rotationSlider.value = angle;
   rotationValue.textContent = angle;
   content.rotation = angle * (Math.PI / 180);
 });
+
 
 
 // Zoom/Pan activation
@@ -75,8 +81,6 @@ function renderFractal({ recenter = false } = {}) {
   // limpiar SOLO el contenido
   content.removeChildren();
 
-  // aplicar rotación del slider al contenido (no al viewport)
-  content.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
 
   const depth = parseInt(depthSlider.value);
   const mandelbrotIterations = depth * 50;
@@ -86,11 +90,15 @@ function renderFractal({ recenter = false } = {}) {
     case 'sierpinski':
       toggleZoomPan(true);
       // Dibuja relativo a pantalla si ya lo tenías así; luego el pivot lo centra
+      setRotationEnabled(true);
+      content.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
       drawSierpinski(content, app.screen.width / 2, 200, 400, depth);
       break;
 
     case 'koch':
       toggleZoomPan(true);
+      setRotationEnabled(true);
+      content.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
       const size = Math.min(app.screen.width, app.screen.height) * 0.6;
       const centerX = app.screen.width / 2;
       const centerY = app.screen.height / 2 + size * Math.sqrt(3) / 6;
@@ -99,6 +107,8 @@ function renderFractal({ recenter = false } = {}) {
 
     case 'fractalTree':
       toggleZoomPan(true);
+      setRotationEnabled(true);
+      content.rotation = parseFloat(rotationSlider.value) * (Math.PI / 180);
       const trunkLength = app.screen.height / 4;
       const startX = app.screen.width / 2;
       const startY = app.screen.height - 20;
@@ -107,11 +117,15 @@ function renderFractal({ recenter = false } = {}) {
 
     case 'mandelbrot':
       toggleZoomPan(false);
+      setRotationEnabled(false);
+      content.rotation = 0;
       mandelbrotExplorer = new MandelbrotExplorer(content, app, mandelbrotIterations);
       break;
 
     case 'julia':
       toggleZoomPan(false);
+      setRotationEnabled(false);
+      content.rotation = 0;
       juliaExplorer = new JuliaExplorer(content, app, { cRe: -0.70176, cIm: -0.3842 }, juliaIterations);
       break;
   }
@@ -150,6 +164,19 @@ saveBtn.addEventListener('click', () => {
   link.href = extractedCanvas.toDataURL('image/png');
   link.click();
 });
+
+function setRotationEnabled(enabled) {
+  rotationSlider.disabled = !enabled;
+  rotationSlider.classList.toggle('disabled', !enabled);
+
+  if (!enabled) {
+    rotationSlider.value = 0;
+    rotationValue.textContent = '0';
+    content.rotation = 0; // asegúrate de que no quede rotado
+  }
+}
+
+
 
 // Initial render
 renderFractal();

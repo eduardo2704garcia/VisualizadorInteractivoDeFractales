@@ -94,3 +94,8 @@ input[type="range"] {
 #saveBtn:hover {
   background-color: #005ed9;
 }
+
+input[type="range"].disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}

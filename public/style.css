@@ -99,3 +99,22 @@ input[type="range"].disabled {
   opacity: 0.4;
   pointer-events: none;
 }
+
+
+.modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; }
+.modal.open { display:block; }
+.modal-content { width:min(600px, 92vw); margin:8vh auto; background:#111; color:#eee; border-radius:12px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,.5); }
+.modal-close { float:right; background:#222; color:#eee; border:none; padding:6px 10px; border-radius:8px; cursor:pointer; }
+.modal-close:hover { background:#333; }
+.algorithm-item { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+.info-btn { padding:4px 8px; border-radius:8px; border:none; cursor:pointer; }
+
+
+.modal-body img {
+  display: block;
+  margin: 0 auto; 
+  max-width: 100%; 
+  height: auto;
+  border-radius: 8px;
+  transform: rotate(0deg); 
+}

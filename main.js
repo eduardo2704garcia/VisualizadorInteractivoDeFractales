@@ -5,10 +5,12 @@ import { drawTree } from './fractals/fractalTree.js';
 import { MandelbrotExplorer } from './fractals/mandelbrot.js';
 import { JuliaExplorer } from './fractals/julia.js';
 import { enableKeyboardControls, setKeyboardActive } from './interactions/controls.js';
+import { setupModalHandler } from './information/modalHandler.js';
 
 let mandelbrotExplorer = null;
 let juliaExplorer = null;
 let currentFractal = 'sierpinski';
+setupModalHandler();
 
 const app = new PIXI.Application({
   resizeTo: window,
@@ -135,7 +137,6 @@ function renderFractal({ recenter = false } = {}) {
   content.pivot.set(b.x + b.width / 2, b.y + b.height / 2);
   content.position.set(0, 0);
 
-  // Solo si quieres “resetear la cámara” (p.ej. al cambiar de fractal)
   if (recenter) {
     viewport.scale.set(1);
     viewport.rotation = 0;
@@ -148,12 +149,15 @@ function renderFractal({ recenter = false } = {}) {
 
 
 // Handle fractal button clicks
-document.querySelectorAll('#fractalButtons button').forEach(button => {
+document.querySelectorAll('#fractalButtons button[data-fractal]').forEach(button => {
   button.addEventListener('click', () => {
-    currentFractal = button.getAttribute('data-fractal');
-    renderFractal({ recenter: true }); // <— opcional; pon false si prefieres mantener vista
+    const fractal = button.dataset.fractal;
+    if (!fractal) return;            
+    currentFractal = fractal;
+    renderFractal({ recenter: true });
   });
 });
+
 
 
 // Save image
@@ -172,7 +176,7 @@ function setRotationEnabled(enabled) {
   if (!enabled) {
     rotationSlider.value = 0;
     rotationValue.textContent = '0';
-    content.rotation = 0; // asegúrate de que no quede rotado
+    content.rotation = 0; 
   }
 }
 

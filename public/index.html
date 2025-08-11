@@ -6,6 +6,8 @@
   <title>Visualizador de Fractales</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 </head>
 
 <body>
@@ -13,13 +15,38 @@
     <h1>Explorador de Fractales Interactivo</h1>
   </header>
 
-  <div id="fractalButtons">
+<div id="fractalButtons">
+  <div class="algorithm-item">
     <button data-fractal="sierpinski">Triángulo de Sierpinski</button>
-    <button data-fractal="koch">Curva de Koch</button>
-    <button data-fractal="fractalTree">Árbol Fractal</button>
-    <button data-fractal="mandelbrot">Conjunto de Mandelbrot</button>
-    <button data-fractal="julia">Conjunto de Julia</button>
+    <button class="info-btn" data-algorithm="sierpinski" title="Información">  <i class="fa-solid fa-circle-question"></i></button>
   </div>
+  <div class="algorithm-item">
+    <button data-fractal="koch">Curva de Koch</button>
+    <button class="info-btn" data-algorithm="koch" title="Información">  <i class="fa-solid fa-circle-question"></i></button>
+  </div>
+  <div class="algorithm-item">
+    <button data-fractal="fractalTree">Árbol Fractal</button>
+    <button class="info-btn" data-algorithm="fractalTree" title="Información">  <i class="fa-solid fa-circle-question "></i></button>
+  </div>
+  <div class="algorithm-item">
+    <button data-fractal="mandelbrot">Conjunto de Mandelbrot</button>
+    <button class="info-btn" data-algorithm="mandelbrot" title="Información">  <i class="fa-solid fa-circle-question"></i></button>
+  </div>
+  <div class="algorithm-item">
+    <button data-fractal="julia">Conjunto de Julia</button>
+    <button class="info-btn" data-algorithm="julia" title="Información">  <i class="fa-solid fa-circle-question"></i></button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="infoModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" aria-label="Cerrar">✕</button>
+    <h2 class="modal-title"></h2>
+    <div class="modal-body"></div>
+  </div>
+</div>
+
 
   <div id="controls">
     <label>

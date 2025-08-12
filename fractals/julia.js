@@ -21,7 +21,6 @@ export class JuliaExplorer {
         this.texture = null;
         this.sprite = null;
 
-        this.attachControls();
         this.render();
     }
 
@@ -62,26 +61,14 @@ export class JuliaExplorer {
     }
 
     updateTexture() {
-if (this.sprite) this.container.removeChild(this.sprite);
-this.sprite = PIXI.Sprite.from(this.canvas);
-this.sprite.anchor.set(0.5);
-this.sprite.position.set(0, 0);
-this.container.addChild(this.sprite);
-
-    }
-
-    attachControls() {
-        this._onWheel = (e) => {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            this.zoom *= delta;
-            this.render();
-        };
-        this.app.view.addEventListener('wheel', this._onWheel);
+        if (this.sprite) this.container.removeChild(this.sprite);
+        this.sprite = PIXI.Sprite.from(this.canvas);
+        this.sprite.anchor.set(0.5);
+        this.sprite.position.set(0, 0);
+        this.container.addChild(this.sprite);
     }
 
     destroy() {
-        this.app.view.removeEventListener('wheel', this._onWheel);
         if (this.sprite) {
             this.container.removeChild(this.sprite);
             this.sprite.destroy();

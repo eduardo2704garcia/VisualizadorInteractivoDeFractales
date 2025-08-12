@@ -1,12 +1,11 @@
 import * as PIXI from 'https://cdn.jsdelivr.net/npm/pixi.js@7.2.4/dist/pixi.min.mjs';
 
 export function drawSierpinski(container, x, y, size, depth) {
-  const height = (Math.sqrt(3) / 2) * size;
+  const colors = [0x4FC3F7, 0x9575CD, 0x4DB6AC]; // azul claro, morado suave, verde agua
 
-  function drawFilledTriangle(g, x, y, size, depth) {
+  function drawFilledTriangle(g, x, y, size, depthLevel) {
     const h = (Math.sqrt(3) / 2) * size;
-    const greenValue = Math.max(0, 255 - depth * 30);
-    const color = (0x00 << 16) | (greenValue << 8) | 0x00;
+    const color = colors[depthLevel % colors.length]; // alterna según el nivel
 
     g.beginFill(color);
     g.moveTo(x, y);
@@ -16,18 +15,20 @@ export function drawSierpinski(container, x, y, size, depth) {
     g.endFill();
   }
 
-  function recursiveDraw(x, y, size, depth) {
-    if (depth === 0) {
+  function recursiveDraw(x, y, size, currentDepth) {
+    if (currentDepth === 0) {
       const graphics = new PIXI.Graphics();
-      drawFilledTriangle(graphics, x, y, size, depth);
+      // Aquí usamos depth - currentDepth para saber el nivel real
+      const depthLevel = depth - currentDepth;
+      drawFilledTriangle(graphics, x, y, size, depthLevel);
       container.addChild(graphics);
     } else {
       const newSize = size / 2;
       const h = (Math.sqrt(3) / 2) * newSize;
 
-      recursiveDraw(x, y, newSize, depth - 1);
-      recursiveDraw(x - newSize / 2, y + h, newSize, depth - 1);
-      recursiveDraw(x + newSize / 2, y + h, newSize, depth - 1);
+      recursiveDraw(x, y, newSize, currentDepth - 1);
+      recursiveDraw(x - newSize / 2, y + h, newSize, currentDepth - 1);
+      recursiveDraw(x + newSize / 2, y + h, newSize, currentDepth - 1);
     }
   }
 
